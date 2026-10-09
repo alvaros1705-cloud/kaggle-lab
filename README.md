@@ -26,3 +26,9 @@ Diagnóstico (8 preguntas), cuestionarios de funcionalidades y licencias, simula
 - El progreso y la ficha se guardan solo en este navegador (`localStorage`); no se envía nada a servidores. No es una calificación institucional.
 - La página no se conecta a Kaggle; no confirma descargas. No pida ni escriba tokens.
 - Limitaciones conocidas: de los datasets solo se verificó que las fichas existan y su título/descripción pública; variables, formatos y licencias deben consultarse en Kaggle. Los enlaces a secciones generales de Kaggle (`/code`, `/learn`, etc.) no pudieron comprobarse automáticamente. No hay capturas reales de Kaggle (se usa un esquema original).
+
+## Idiomas (ES/EN)
+- Selector 🇪🇸/🇺🇸 en la barra superior; preferencia en `localStorage` (`kagglelab-lang`), español por defecto; sin almacenamiento funciona durante la sesión.
+- `assets/js/i18n.js` contiene el diccionario `EN` (clave = texto fuente en español) y reglas para textos con números. El motor traduce el DOM in situ (incluido lo generado dinámicamente), por eso cambiar de idioma no reinicia respuestas, puntuaciones ni progreso.
+- **Agregar o cambiar un texto:** edite el español en `content.js`/`activities.js` y añada su traducción en `EN` con exactamente el mismo texto como clave (ignorando espacios repetidos). Un texto sin entrada se muestra en español.
+- Limitación: las claves son los textos fuente, no identificadores numéricos; si cambia un texto en español debe actualizar su clave.

@@ -65,3 +65,8 @@ label.f{display:block;margin:10px 0 2px;font-weight:600;font-size:14px}input.t{w
 #side label,label.f{color:var(--tx)}
 :root #q{background-color:#fff;color:#1F2937;-webkit-text-fill-color:#1F2937;border:1px solid #64748B;color-scheme:light}
 :root #q::placeholder{color:#4B5563;opacity:1}
+#lang{position:fixed;top:8px;right:12px;z-index:7;display:flex;gap:6px}
+#lang button[aria-pressed=true]{background:var(--pr);color:var(--on);border-color:var(--pr)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+main{padding-top:52px}
+@media(max-width:800px){#lang{right:auto;left:8px}main{padding-top:56px}}
