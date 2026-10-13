@@ -32,3 +32,9 @@ Diagnóstico (8 preguntas), cuestionarios de funcionalidades y licencias, simula
 - `assets/js/i18n.js` contiene el diccionario `EN` (clave = texto fuente en español) y reglas para textos con números. El motor traduce el DOM in situ (incluido lo generado dinámicamente), por eso cambiar de idioma no reinicia respuestas, puntuaciones ni progreso.
 - **Agregar o cambiar un texto:** edite el español en `content.js`/`activities.js` y añada su traducción en `EN` con exactamente el mismo texto como clave (ignorando espacios repetidos). Un texto sin entrada se muestra en español.
 - Limitación: las claves son los textos fuente, no identificadores numéricos; si cambia un texto en español debe actualizar su clave.
+
+## Revisión técnica de interacciones (13 de octubre de 2026)
+- En los cuestionarios, una opción seleccionada queda bloqueada; si es incorrecta, se señala la correcta. Las selecciones parciales se guardan localmente y se restauran bloqueadas después de volver a cargar la página. El botón explícito «Volver a intentar» reinicia el cuestionario correspondiente.
+- Las actividades con botón «Evaluar» exigen una selección o todos los campos requeridos antes de mostrar retroalimentación. Tras una evaluación válida, sus controles quedan bloqueados y la evaluación se restaura al volver a cargar.
+- La barra de progreso y las insignias cuentan únicamente actividades evaluadas o pasos completados. Desmarcar un paso de la lista o vaciar un campo obligatorio de la ficha retira la finalización correspondiente.
+- Se verificaron sintaxis de JavaScript, ausencia de errores en pruebas de interacción, selector ES/EN, restauración de evaluaciones y visualización móvil a 390 px. Los estilos y la distribución de la página se conservaron; solo se añadió un indicador visual discreto para botones deshabilitados.

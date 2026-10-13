@@ -465,10 +465,10 @@ const EN={
 "Universidad Simón Bolívar - Campus Cúcuta": "Universidad Simón Bolívar - Cúcuta Campus"
 };
 
-Object.assign(EN,{'3 indicadores medibles y decisión coherente; separa correlación y causa':'3 measurable indicators and a coherent decision; separates correlation from cause','Buen punto de partida: refuerce los Módulos 3 y 4.':'Good starting point: reinforce Modules 3 and 4.','Sólido: avance al Módulo 3 y practique la descarga real.':'Solid: move on to Module 3 and practice the real download.'});
+Object.assign(EN,{'3 indicadores medibles y decisión coherente; separa correlación y causa':'3 measurable indicators and a coherent decision; separates correlation from cause','Buen punto de partida: refuerce los Módulos 3 y 4.':'Good starting point: reinforce Modules 3 and 4.','Sólido: avance al Módulo 3 y practique la descarga real.':'Solid: move on to Module 3 and practice the real download.','Seleccione al menos una palabra clave para cada caso antes de evaluar.':'Select at least one keyword for each case before evaluating.','Seleccione un dataset antes de evaluar.':'Select a dataset before evaluating.','Marque al menos una fila que considere problemática antes de evaluar.':'Mark at least one row that you consider problematic before evaluating.','Clasifique todas las variables antes de evaluar.':'Classify all variables before evaluating.','Responda todas las filas antes de evaluar.':'Answer every row before evaluating.'});
 const LANGKEY='kagglelab-lang';let LANG='es';
 const _o=new WeakMap(),_a=new WeakMap();
-const CRI={'licencia':'license','fecha/vigencia':'date/currency','documentación':'documentation','sesgo/representatividad':'bias/representativeness','privacidad':'privacy','limitaciones':'limitations','ninguno':'none'};
+const CRI={'licencia':'license','fecha/vigencia':'date/recency','documentación':'documentation','sesgo/representatividad':'bias/representativeness','privacidad':'privacy','limitaciones':'limitations','ninguno':'none'};
 const tk=k=>EN[k]!==undefined?EN[k]:rules(k);
 function rules(k){let m;
  if(m=k.match(/^(\d+) % completado$/))return`${m[1]} % completed`;

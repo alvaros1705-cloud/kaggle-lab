@@ -70,3 +70,6 @@ label.f{display:block;margin:10px 0 2px;font-weight:600;font-size:14px}input.t{w
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 main{padding-top:52px}
 @media(max-width:800px){#lang{right:auto;left:8px}main{padding-top:56px}}
+/* Estado funcional de controles bloqueados tras evaluar; conserva el diseño existente. */
+button:disabled{cursor:not-allowed}
+button:not(.opt):disabled{opacity:.72}
