@@ -45,3 +45,8 @@ Diagnóstico (8 preguntas), cuestionarios de funcionalidades y licencias, simula
 El botón **Generar informe integral PDF** prepara un documento imprimible con el avance general, módulos visitados, estado y puntajes de actividades, respuestas/evidencias que el navegador haya guardado, checklist de descarga, insignias y la ficha final del reto. Puede generarse aunque la ficha final esté incompleta; el informe identifica los campos pendientes. El reto M8 solo se registra como completado cuando la ficha contiene todos sus campos obligatorios.
 
 El informe refleja únicamente el estado local guardado en el navegador. No acredita de forma automática búsquedas, descargas o ejecuciones en Kaggle; la lista de descarga es un autorreporte. Para exportar el documento, el navegador debe permitir ventanas emergentes y se debe elegir **Guardar como PDF** en el diálogo de impresión.
+
+
+## Escala de evaluación del Módulo 8
+
+La rúbrica usa calificaciones por criterio de **1,0 a 5,0** y una nota final ponderada también entre **1,0 y 5,0**. Las ponderaciones (20 %, 20 %, 20 %, 25 % y 15 %) son pesos relativos, no puntos ni una calificación sobre 100. La nota se calcula como la suma de cada calificación multiplicada por su ponderación porcentual, dividida entre 100.
