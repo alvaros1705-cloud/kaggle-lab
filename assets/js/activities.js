@@ -38,6 +38,108 @@ function responseOrUndo(id) {
   if (!saved && P.s().act[id] && P.s().act[id].completed) P.undone(id);
   return saved;
 }
+
+/* Reúne evidencia guardada localmente para el informe imprimible integral. */
+const ACT_LABELS={
+  diag:'Diagnóstico inicial',funcs:'Funcionalidades de Kaggle',kw:'Estrategia de búsqueda de datasets',
+  chk:'Lista de verificación de descarga',cmp:'Comparación de datasets',qual:'Evaluación de calidad de datos',
+  lic:'Licencias y uso responsable',cls:'Clasificación de variables',match:'Relación entre problema y dataset',fin:'Reto integrador y ficha final'
+};
+const ACT_MODULE={diag:'m0',funcs:'m1',kw:'m2',chk:'m3',cmp:'m4',qual:'m4',lic:'m4',cls:'m5',match:'m7',fin:'m8'};
+const QUAL_ROWS=[
+  'Fila 1: registro de referencia (Cúcuta, edad 29, salario presente)',
+  'Fila 2: posible duplicado exacto de la fila 1',
+  'Fila 3: registro de Bogotá sin problema evidente declarado',
+  'Fila 4: edad 250 (valor atípico/imposible)',
+  'Fila 5: salario vacío (valor faltante)',
+  'Fila 6: ciudad escrita como «cucuta » (inconsistencia)',
+  'Fila 7: fecha de ingreso en el futuro'
+];
+const CLS_VARIABLES=['edad','id_cliente','ciudad','fecha_compra','total_pedido','codigo_postal','abandono (Sí/No)'];
+const CLS_TYPES=['Numérica','Categórica','Fecha/hora','Identificador'];
+function buildProgressReport(escHtml){
+  const s=P.s(), trSafe=x=>escHtml(tr(String(x??''))), value=x=>String(x??'').trim(),
+    out=x=>value(x)?escHtml(value(x)).replace(/\r?\n/g,'<br>'):`<span class="muted">${escHtml(tr('Sin información registrada'))}</span>`,
+    list=(items)=>items.length?`<ul>${items.map(x=>`<li>${x}</li>`).join('')}</ul>`:`<p class="muted">${tr('Sin información registrada')}</p>`,
+    pct=P.pct(), visited=MOD.filter(m=>!!s.mods[m.id]).length,
+    completed=ACTS.filter(a=>s.act[a]&&s.act[a].completed).length,
+    filled=FIELDS.filter(f=>value(s.txt[f[0]])).length,
+    doneStatus=id=>!!(s.act[id]&&s.act[id].completed),
+    evidenceStatus=id=>{
+      if(doneStatus(id))return tr('Completada');
+      if(id==='chk'&&ST.some((_,i)=>!!s.chk['d'+i]))return tr('En curso');
+      if(id==='fin'&&FIELDS.some(f=>value(s.txt[f[0]])))return tr('En curso');
+      const r=s.responses[id];
+      if(r&&(Array.isArray(r.selected)?r.selected.some(Boolean):Object.keys(r).length>0))return tr('En curso');
+      if(r&&r.evaluated)return tr('En curso');
+      return tr('Sin iniciar');
+    },
+    scoreOf=id=>{const r=s.act[id];return r&&r.completed?`${r.s}/${r.m}`:'—';},
+    bestOf=id=>{const r=s.act[id];return r&&(r.completed||Number(r.best)>0)?`${r.best}/${r.m}`:'—';};
+  const moduleRows=MOD.map(m=>{
+    const ids=ACTS.filter(a=>ACT_MODULE[a]===m.id);
+    const actText=ids.length?ids.map(id=>`${tr(ACT_LABELS[id])}: ${evidenceStatus(id)}${doneStatus(id)?` (${scoreOf(id)})`:''}`).join('<br>'):tr('Módulo de consulta; no tiene una actividad calificable guardada');
+    return `<tr><td>${trSafe(m.t)}</td><td>${m.obj.map(trSafe).join('<br>')}</td><td>${s.mods[m.id]?tr('Visitado'):tr('Pendiente')}</td><td>${actText}</td></tr>`;
+  }).join('');
+  const scoreRows=ACTS.map(id=>`<tr><td>${trSafe(ACT_LABELS[id])}</td><td>${trSafe(MOD.find(m=>m.id===ACT_MODULE[id])?.t||ACT_MODULE[id])}</td><td>${trSafe(evidenceStatus(id))}</td><td>${scoreOf(id)}</td><td>${bestOf(id)}</td></tr>`).join('');
+  const detailSections=ACTS.map(id=>{
+    const r=s.responses[id]||null;
+    let detail='';
+    if(Q[id]){
+      const entries=Q[id].map((q,i)=>{
+        const a=r&&r[i], has=a&&Number.isInteger(Number(a.selected))&&q[1][Number(a.selected)]!==undefined;
+        const answer=has?`${tr('Respuesta seleccionada')}: ${tr(q[1][Number(a.selected)])} — ${Number(a.selected)===q[2]?tr('Correcta'):tr('Incorrecta')}`:tr('Sin respuesta registrada');
+        return `<li><b>${i+1}. ${trSafe(q[0])}</b><br>${trSafe(answer)}</li>`;
+      });
+      detail=list(entries);
+    } else if(id==='kw'){
+      const selection=r&&r.selected;
+      const cases=KW.map((c,i)=>{
+        const chosen=c.o.filter((o,j)=>!!(selection&&selection[i]&&selection[i][j])).map(o=>trSafe(o[0]));
+        return `<li><b>${trSafe(c.p)}</b><br>${tr('Palabras clave marcadas')}: ${chosen.length?chosen.join(', '):tr('Ninguna')}</li>`;
+      });
+      detail=list(cases)+`<h4>${tr('Justificación de la estrategia')}</h4><p>${out(r&&r.justification)}</p>`;
+    } else if(id==='chk'){
+      const marked=ST.filter((_,i)=>!!s.chk['d'+i]).length;
+      detail=`<p><b>${marked} / ${ST.length}</b> ${tr('pasos marcados por el estudiante (autorreporte)')}.</p>`+list(ST.map((step,i)=>`${trSafe(step)} — <b>${s.chk['d'+i]?tr('Marcado'):tr('Pendiente')}</b>`));
+    } else if(id==='cmp'){
+      const choice=(r&&r.dataset)||'';
+      const labels={A:'Dataset A — grande y popular, pero antiguo y con licencia no indicada',B:'Dataset B — documentado, actualizado y con licencia clara; limitado a un país',C:'Dataset C — sintético; útil para pruebas, no para inferir sobre personas reales'};
+      detail=`<p><b>${tr('Dataset seleccionado')}:</b> ${choice?trSafe(labels[choice]||choice):tr('Sin selección registrada')}</p><h4>${tr('Justificación')}</h4><p>${out(r&&r.justification)}</p>`;
+    } else if(id==='qual'){
+      const selected=r&&r.selected||[];
+      detail=`<p><b>${tr('Actividad evaluada')}:</b> ${r&&r.evaluated?tr('Sí'):tr('No')}</p>`+list(QUAL_ROWS.map((row,i)=>`${trSafe(row)} — <b>${selected[i]?tr('Marcado como problema'):tr('No marcado')}</b>`));
+    } else if(id==='cls'){
+      const vals=r&&r.values||[];
+      detail=list(CLS_VARIABLES.map((v,i)=>`${trSafe(v)}: <b>${vals[i]!==undefined&&vals[i]!==''?trSafe(CLS_TYPES[Number(vals[i])]||vals[i]):tr('Sin clasificar')}</b>`));
+    } else if(id==='match'){
+      const vals=r&&r.values||[];
+      detail=list(MATCH.map((m,i)=>`${trSafe(m[0])}<br><b>${tr('Dataset seleccionado')}:</b> ${vals[i]!==undefined&&vals[i]!==''?trSafe(MN[Number(vals[i])]||vals[i]):tr('Sin selección')}`));
+    } else if(id==='fin'){
+      detail=FIELDS.map(f=>`<section class="field"><h4>${trSafe(f[1])}</h4><p>${out(s.txt[f[0]])}</p></section>`).join('');
+    } else {
+      detail=`<p>${tr('Esta actividad no guarda respuestas detalladas adicionales.')}</p>`;
+    }
+    const score=doneStatus(id)?`<span class="score">${tr('Puntaje')}: ${scoreOf(id)}; ${tr('mejor resultado')}: ${bestOf(id)}</span>`:`<span class="muted">${tr('Sin puntaje final guardado')}</span>`;
+    return `<section class="activity"><h3>${trSafe(ACT_LABELS[id])}</h3><p class="meta">${trSafe(MOD.find(m=>m.id===ACT_MODULE[id])?.t||'')} · ${trSafe(evidenceStatus(id))} · ${score}</p>${detail}</section>`;
+  }).join('');
+  const badges=P.badges().map(b=>`<li><b>${b[1]?'✓':'○'} ${trSafe(b[0])}</b> — ${trSafe(b[2])}</li>`).join('');
+  const now=new Date();
+  const locale=document.documentElement.lang==='en'?'en-US':'es-CO';
+  const generated=now.toLocaleString(locale,{dateStyle:'long',timeStyle:'short'});
+  const student=value(s.txt.nombre);
+  return `<h1>${tr('INFORME INTEGRAL DE ACTIVIDADES — KAGGLE LAB')}</h1>
+    <p class="meta">${tr('Generado desde Kaggle Lab')} · ${escHtml(generated)}</p>
+    <p><b>${tr('Estudiante')}:</b> ${student?escHtml(student):tr('No indicado')} &nbsp; <b>${tr('Progreso general')}:</b> ${pct}%</p>
+    <div class="kpis"><div><b>${pct}%</b><span>${tr('Progreso registrado')}</span></div><div><b>${visited}/${MOD.length}</b><span>${tr('Módulos visitados')}</span></div><div><b>${completed}/${ACTS.length}</b><span>${tr('Actividades completadas')}</span></div><div><b>${filled}/${FIELDS.length}</b><span>${tr('Campos de ficha diligenciados')}</span></div></div>
+    <section><h2>${tr('1. Resumen ejecutivo')}</h2><p>${tr('Este informe consolida el avance que el laboratorio tiene guardado en este navegador, los resultados registrados y las respuestas disponibles al momento de generarlo.')}</p><p>${tr('El porcentaje de progreso combina módulos visitados y actividades completadas; no equivale a una nota académica.')}</p>${filled<FIELDS.length?`<p class="incomplete"><b>${tr('La ficha final todavía está incompleta')}.</b> ${tr('Campos pendientes')}: ${FIELDS.filter(f=>!value(s.txt[f[0]])).map(f=>trSafe(f[1])).join(', ')}.</p>`:''}</section>
+    <section><h2>${tr('2. Recorrido por los módulos')}</h2><table><thead><tr><th>${tr('Módulo')}</th><th>${tr('Objetivos de aprendizaje')}</th><th>${tr('Visita')}</th><th>${tr('Actividad y evidencia registrada')}</th></tr></thead><tbody>${moduleRows}</tbody></table></section>
+    <section><h2>${tr('3. Estado y resultados de las actividades')}</h2><table><thead><tr><th>${tr('Actividad')}</th><th>${tr('Módulo')}</th><th>${tr('Estado')}</th><th>${tr('Último puntaje')}</th><th>${tr('Mejor puntaje guardado')}</th></tr></thead><tbody>${scoreRows}</tbody></table></section>
+    <section><h2>${tr('4. Evidencias y respuestas registradas')}</h2>${detailSections}</section>
+    <section><h2>${tr('5. Insignias del laboratorio')}</h2><ul>${badges}</ul></section>
+    <section><h2>${tr('6. Alcance y trazabilidad')}</h2><ul><li>${tr('El progreso se guarda localmente en este navegador y dispositivo; no se sincroniza automáticamente con el docente.')}</li><li>${tr('La plataforma no puede verificar por sí sola búsquedas, descargas o ejecuciones realizadas directamente en Kaggle; esos pasos pueden figurar como autorreporte.')}</li><li>${tr('El registro guarda el estado actual y las respuestas disponibles, pero no conserva una marca de tiempo independiente para cada acción ni un historial completo de cambios.')}</li><li>${tr('Revise las fuentes, condiciones de licencia, privacidad y limitaciones de los datos utilizados antes de tomar decisiones empresariales.')}</li></ul></section>
+    <section><h2>${tr('7. Síntesis de la ficha final')}</h2><p>${tr('La ficha completa del reto integrador aparece en la sección de evidencias; este resumen permite identificar el problema, la pregunta, los datasets, las variables, los indicadores, la oportunidad y la conclusión propuesta.')}</p></section>`;
+}
 function quiz(el, id, qs, final) {
   const storedAnswers = P.response(id) || {};
   let ans = {};
@@ -187,7 +289,7 @@ const MT={
     el.querySelector('#mb').onclick=e=>{if(!e.currentTarget.disabled)evaluate();};if(saved&&saved.evaluated)evaluate();
   },
   fin(el) {
-    el.innerHTML='<div class="card"><b>Ficha de entrega</b> (se guarda en este navegador)'+FIELDS.map(f=>`<label class="f" for="f-${f[0]}">${f[1]}</label>${f[2]==='t'?`<input class="t" id="f-${f[0]}" data-f="${f[0]}">`:`<textarea id="f-${f[0]}" data-f="${f[0]}"></textarea>`}`).join('')+'<p><button class="btn" id="fd">Descargar .txt</button> <button class="btn s" id="fp">Imprimir / guardar PDF</button> <button class="btn s" id="fc">Borrar ficha</button></p><div class="fb" id="ff" aria-live="polite"></div></div>';
+    el.innerHTML='<div class="card"><b>Ficha de entrega</b> (se guarda en este navegador)'+FIELDS.map(f=>`<label class="f" for="f-${f[0]}">${f[1]}</label>${f[2]==='t'?`<input class="t" id="f-${f[0]}" data-f="${f[0]}">`:`<textarea id="f-${f[0]}" data-f="${f[0]}"></textarea>`}`).join('')+'<p><button class="btn" id="fd">Descargar .txt</button> <button class="btn s" id="fp">Generar informe integral PDF</button> <button class="btn s" id="fc">Borrar ficha</button></p><div class="fb" id="ff" aria-live="polite"></div></div>';
     el.querySelectorAll('[data-f]').forEach(input=>{input.value=P.s().txt[input.dataset.f]||'';input.oninput=()=>{P.txt(input.dataset.f,input.value);const missing=FIELDS.some(f=>!(P.s().txt[f[0]]||'').trim());if(missing&&P.s().act.fin&&P.s().act.fin.completed)P.undone('fin');};});
     const need=()=>{const missing=FIELDS.filter(f=>!(P.s().txt[f[0]]||'').trim());el.querySelector('#ff').textContent=missing.length?'Faltan campos: '+missing.map(f=>f[1].split(' (')[0]).join('; '):'';return missing.length===0;};
     el.querySelector('#fd').onclick=()=>{
@@ -195,7 +297,33 @@ const MT={
       const content=tr('KAGGLE LAB — FICHA DE ENTREGA')+'\n\n'+FIELDS.map(f=>`${tr(f[1])}:\n${P.s().txt[f[0]]}\n`).join('\n');
       const url=URL.createObjectURL(new Blob([content],{type:'text/plain;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='ficha-kaggle-lab.txt';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);P.done('fin',1,1);
     };
-    el.querySelector('#fp').onclick=()=>{if(!need())return;P.done('fin',1,1);document.body.classList.add('pf');print();setTimeout(()=>document.body.classList.remove('pf'),500);};
+    el.querySelector('#fp').onclick=()=>{
+      const popup=window.open('','_blank');
+      if(!popup){el.querySelector('#ff').textContent=tr('El navegador bloqueó la ventana de impresión. Permita las ventanas emergentes para este sitio e inténtelo de nuevo.');return;}
+      try{popup.opener=null;}catch(_){}
+      const formComplete=FIELDS.every(f=>String(P.s().txt[f[0]]??'').trim());
+      if(formComplete)P.done('fin',1,1);
+      else if(P.s().act.fin&&P.s().act.fin.completed)P.undone('fin');
+      const escHtml=value=>String(value??'').replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch]));
+      const title=tr('INFORME INTEGRAL DE ACTIVIDADES — KAGGLE LAB');
+      const report=buildProgressReport(escHtml);
+      popup.document.open();
+      popup.document.write(`<!doctype html><html lang="${document.documentElement.lang||'es'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escHtml(title)}</title><style>
+        *{box-sizing:border-box}body{font:10.5pt/1.45 Arial,sans-serif;color:#182033;max-width:1000px;margin:26px auto;padding:0 26px}
+        h1{font-size:22pt;line-height:1.2;border-bottom:3px solid #275da8;padding-bottom:12px;color:#152746}
+        h2{font-size:15pt;margin:26px 0 10px;color:#1c477e;border-bottom:1px solid #c9d3df;padding-bottom:5px}
+        h3{font-size:12pt;margin:18px 0 4px;color:#263e60}h4{font-size:10.5pt;margin:12px 0 4px}
+        p{margin:5px 0 10px;overflow-wrap:anywhere}.meta,.muted{color:#586579;font-size:9pt}.score{font-weight:bold;color:#173f74}
+        .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}.kpis div{border:1px solid #cbd5e1;border-radius:7px;padding:12px;background:#f4f7fb}.kpis b{display:block;font-size:18pt;color:#214e87}.kpis span{display:block;font-size:9pt;margin-top:4px}
+        table{border-collapse:collapse;width:100%;margin:12px 0 20px;table-layout:auto}th,td{border:1px solid #c8d1dd;padding:6px 7px;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf0f7;color:#1c3457}
+        ul{padding-left:22px}li{margin:4px 0}.activity{border-top:1px solid #d9e0e8;padding-top:9px;margin-top:14px;break-inside:avoid}.field{margin:10px 0}.field h4{color:#28466d}.field p{border-bottom:1px dotted #bcc7d4;padding:4px 0 8px;min-height:1em}
+        section{margin:18px 0}.activity ul{margin-top:6px}a{color:#174d8a} @page{size:auto;margin:15mm}
+        @media print{body{max-width:none;margin:0;padding:0}.kpis{grid-template-columns:repeat(4,1fr)}h2,h3{break-after:avoid}table{break-inside:auto}tr,.kpis div{break-inside:avoid}.activity{break-inside:auto}.field{break-inside:avoid}}
+        @media screen and (max-width:720px){body{padding:0 12px}.kpis{grid-template-columns:repeat(2,1fr)}table{font-size:9pt}}
+      </style></head><body>${report}<script>window.addEventListener('load',function(){setTimeout(function(){window.focus();window.print();},300);});<\/script></body></html>`);
+      popup.document.close();
+      el.querySelector('#ff').textContent=tr('Se abrió el informe integral en una ventana de impresión. Elija “Guardar como PDF” en el destino de impresión.');
+    };
     el.querySelector('#fc').onclick=()=>{if(confirm(tr('¿Borrar los campos de la ficha?'))){FIELDS.forEach(f=>P.txt(f[0],''));el.querySelectorAll('[data-f]').forEach(i=>i.value='');P.undone('fin');el.querySelector('#ff').textContent='';}};
   }
 };

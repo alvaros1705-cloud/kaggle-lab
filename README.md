@@ -38,3 +38,10 @@ Diagnóstico (8 preguntas), cuestionarios de funcionalidades y licencias, simula
 - Las actividades con botón «Evaluar» exigen una selección o todos los campos requeridos antes de mostrar retroalimentación. Tras una evaluación válida, sus controles quedan bloqueados y la evaluación se restaura al volver a cargar.
 - La barra de progreso y las insignias cuentan únicamente actividades evaluadas o pasos completados. Desmarcar un paso de la lista o vaciar un campo obligatorio de la ficha retira la finalización correspondiente.
 - Se verificaron sintaxis de JavaScript, ausencia de errores en pruebas de interacción, selector ES/EN, restauración de evaluaciones y visualización móvil a 390 px. Los estilos y la distribución de la página se conservaron; solo se añadió un indicador visual discreto para botones deshabilitados.
+
+
+### Informe integral del estudiante (Módulo 8)
+
+El botón **Generar informe integral PDF** prepara un documento imprimible con el avance general, módulos visitados, estado y puntajes de actividades, respuestas/evidencias que el navegador haya guardado, checklist de descarga, insignias y la ficha final del reto. Puede generarse aunque la ficha final esté incompleta; el informe identifica los campos pendientes. El reto M8 solo se registra como completado cuando la ficha contiene todos sus campos obligatorios.
+
+El informe refleja únicamente el estado local guardado en el navegador. No acredita de forma automática búsquedas, descargas o ejecuciones en Kaggle; la lista de descarga es un autorreporte. Para exportar el documento, el navegador debe permitir ventanas emergentes y se debe elegir **Guardar como PDF** en el diálogo de impresión.
