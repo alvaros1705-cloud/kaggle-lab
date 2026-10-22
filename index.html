@@ -4,7 +4,27 @@
 <link rel="stylesheet" href="assets/css/styles.css"></head>
 <body>
 <button id="menu" class="btn" aria-label="Abrir menú">☰ Menú</button>
-<div id="lang" role="group" aria-label="Idioma / Language"><button class="btn s sm" data-lang="es" lang="es" aria-pressed="true">🇪🇸 Español</button><button class="btn s sm" data-lang="en" lang="en" aria-pressed="false">🇺🇸 English</button></div><div id="ll" class="sr" aria-live="polite"></div>
+<div id="lang" role="group" aria-label="Idioma / Language">
+<button class="btn s sm lang-btn" data-lang="es" lang="es" aria-label="Español" aria-pressed="true">
+<svg class="flag flag-co" viewBox="0 0 30 20" role="img" aria-label="Bandera de Colombia" focusable="false"><rect width="30" height="10" fill="#FCD116"/><rect y="10" width="30" height="5" fill="#003893"/><rect y="15" width="30" height="5" fill="#CE1126"/></svg><span>Español</span>
+</button>
+<button class="btn s sm lang-btn" data-lang="en" lang="en" aria-label="English" aria-pressed="false">
+<svg class="flag flag-us" viewBox="0 0 30 20" role="img" aria-label="Flag of the United States" focusable="false">
+  <rect width="30" height="20" fill="#FFFFFF"/>
+  <path fill="#B22234" d="M0 0h30v1.538H0z M0 3.077h30v1.538H0z M0 6.154h30v1.538H0z M0 9.231h30v1.538H0z M0 12.308h30v1.538H0z M0 15.385h30v1.538H0z M0 18.462h30v1.538H0z"/>
+  <rect width="12.6" height="10.77" fill="#3C3B6E"/>
+  <g fill="#FFFFFF">
+    <circle cx="1.1" cy="1.2" r="0.38"/><circle cx="3.2" cy="1.2" r="0.38"/><circle cx="5.3" cy="1.2" r="0.38"/><circle cx="7.4" cy="1.2" r="0.38"/><circle cx="9.5" cy="1.2" r="0.38"/><circle cx="11.6" cy="1.2" r="0.38"/>
+    <circle cx="2.15" cy="2.65" r="0.38"/><circle cx="4.25" cy="2.65" r="0.38"/><circle cx="6.35" cy="2.65" r="0.38"/><circle cx="8.45" cy="2.65" r="0.38"/><circle cx="10.55" cy="2.65" r="0.38"/>
+    <circle cx="1.1" cy="4.1" r="0.38"/><circle cx="3.2" cy="4.1" r="0.38"/><circle cx="5.3" cy="4.1" r="0.38"/><circle cx="7.4" cy="4.1" r="0.38"/><circle cx="9.5" cy="4.1" r="0.38"/><circle cx="11.6" cy="4.1" r="0.38"/>
+    <circle cx="2.15" cy="5.55" r="0.38"/><circle cx="4.25" cy="5.55" r="0.38"/><circle cx="6.35" cy="5.55" r="0.38"/><circle cx="8.45" cy="5.55" r="0.38"/><circle cx="10.55" cy="5.55" r="0.38"/>
+    <circle cx="1.1" cy="7" r="0.38"/><circle cx="3.2" cy="7" r="0.38"/><circle cx="5.3" cy="7" r="0.38"/><circle cx="7.4" cy="7" r="0.38"/><circle cx="9.5" cy="7" r="0.38"/><circle cx="11.6" cy="7" r="0.38"/>
+    <circle cx="2.15" cy="8.45" r="0.38"/><circle cx="4.25" cy="8.45" r="0.38"/><circle cx="6.35" cy="8.45" r="0.38"/><circle cx="8.45" cy="8.45" r="0.38"/><circle cx="10.55" cy="8.45" r="0.38"/>
+    <circle cx="1.1" cy="9.9" r="0.38"/><circle cx="3.2" cy="9.9" r="0.38"/><circle cx="5.3" cy="9.9" r="0.38"/><circle cx="7.4" cy="9.9" r="0.38"/><circle cx="9.5" cy="9.9" r="0.38"/><circle cx="11.6" cy="9.9" r="0.38"/>
+  </g>
+</svg><span>English</span>
+</button>
+</div><div id="ll" class="sr" aria-live="polite"></div>
 <aside id="side"><h1>KAGGLE LAB<br><small>Explora. Descarga. Analiza. Transforma.</small></h1>
 <label for="q" style="font-size:12px">Buscar en los módulos</label><input id="q" type="search" placeholder="Buscar…">
 <div class="bar" style="margin-top:12px"><i id="pb"></i></div><small id="pt"></small>
